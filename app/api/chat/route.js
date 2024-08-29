@@ -40,12 +40,23 @@ export async function POST(req) {
     const data = await req.json();
 
     // Initialize Pinecone with the API key from environment variables
+
+    const pineconeApiKey = process.env.PINECONE_API_KEY;
+    if (!pineconeApiKey) {
+        return NextResponse(JSON.stringify({ error: "Pinecone API key is not set" }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
     const pc = new Pinecone({
-        apiKey: process.env.PINECONE_API_KEY,
+        apiKey: pineconeApiKey,
+      
+
     });
 
     // Create a Pinecone index instance for the "RatemyInternship" index
-    const index = pc.Index("RatemyInternship").namespace('ns1');
+    const index = pc.index("ratemyinternship").namespace("ns1")
+    
 
     // Initialize OpenAI client
     const openai = new OpenAI()
@@ -64,7 +75,8 @@ export async function POST(req) {
     const result = await index.query({
         vector: embedding.data[0].embedding,
         topK: 5,
-        includeValues: false,
+    
+        includeMetadata: true,
     });
 
     // Build a string summarizing the results from Pinecone
@@ -72,17 +84,21 @@ export async function POST(req) {
     result.matches.forEach((match) => {
         resultString += `
         Returned Result:
-        Company: ${match.metadata.company}
+        Company: ${match.id}
+        Pros: ${match.metadata.pros}
         Title: ${match.metadata.title}
-        Review: ${match.metadata.review}
         Rating: ${match.metadata.rating}
-        Work-Life Balance: ${match.metadata.work_life_balance}
-        Learning Opportunities: ${match.metadata.learning_opportunities}
-        Compensation: ${match.metadata.compensation}
-        Location: ${match.metadata.location}
+    Work-Life Balance: ${match.metadata.rating_balance}
+       
+        
         \n\n
         `;
+       
     });
+
+    // return NextResponse.json({ resultString });
+
+   
 
     // Append the result summary to the last message content
     const lastMessage = data[data.length - 1];
