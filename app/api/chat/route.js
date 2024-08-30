@@ -11,6 +11,10 @@
 import { NextResponse } from "next/server";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { OpenAI } from "openai";
+import { ReadableStream } from "web-streams-polyfill";
+import { streamText, convertToCoreMessages } from 'ai';
+// import { openai } from '@ai-sdk/openai';
+import { createOpenAI } from '@ai-sdk/openai';
 
 const systemPrompt = `you are an AI assistant designed for the RatemyInternship app, which helps students find relevant information about internships based on the experiences of others. The assistant has access to a database of internship reviews and information through Retrieval-Augmented Generation (RAG).
 Key functionalities:
@@ -37,7 +41,7 @@ Adapt responses to the user's level of experience and familiarity with the inter
 
 export async function POST(req) {
     // Parse the incoming request data
-    const data = await req.json();
+    const {messages} = await req.json();
 
     // Initialize Pinecone with the API key from environment variables
 
@@ -61,13 +65,15 @@ export async function POST(req) {
     // Initialize OpenAI client
     const openai = new OpenAI()
 
-    // Extract the last message content from the request data
-    const text  = data[data.length - 1].content;
+    // Extract the last message content from the request datac
+    const text  = messages[messages.length - 1];
+    const lastText = text.content
+
 
     // Generate an embedding for the last message using OpenAI's embedding model
     const embedding = await openai.embeddings.create({
         model: "text-embedding-3-small",
-        input: text,
+        input: lastText,
         encoding_format: "float",
     });
 
@@ -101,22 +107,32 @@ export async function POST(req) {
    
 
     // Append the result summary to the last message content
-    const lastMessage = data[data.length - 1];
+    const lastMessage = messages[messages.length - 1];
     const lastMessageContent = lastMessage.content + resultString;
 
     // Prepare the messages for the chat completion excluding the last message
-    const lastDataWhithoutLastMessage = data.slice(0, data.length - 1);
+    const lastDataWhithoutLastMessage = messages.slice(0, messages.length - 1);
 
     // Create a chat completion with OpenAI using the prepared messages
-    const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-            {role: 'system', content: systemPrompt},
-            ...lastDataWhithoutLastMessage,
-            {role: 'user', content: lastMessageContent},
-        ],
-        stream: true,
-    });
+    // const completion = await openai.chat.completions.create({
+    //     model: "gpt-3.5-turbo",
+    //     messages: [
+    //         {role: 'system', content: systemPrompt},
+    //         ...lastDataWhithoutLastMessage,
+    //         {role: 'user', content: lastMessageContent},
+    //     ],
+    //     stream: true,
+    // });
+    const openaiClient = createOpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+    const newStream = await streamText({
+        model: openaiClient('gpt-4-turbo'),
+        messages: convertToCoreMessages(messages),
+      });
+    
+    return newStream.toDataStreamResponse();
 
     // Stream the response from the OpenAI completion back to the client
     const stream = new ReadableStream({
