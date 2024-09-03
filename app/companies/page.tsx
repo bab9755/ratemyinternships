@@ -78,26 +78,26 @@ const Page = () => {
           Search
         </button>
       </div>
+        </div>
+
+
+    <div className="flex flex-row h-screen">
+    <div className="w-2/3 border-r-2 border-gray-300 overflow-y-auto">
+        <div className="w-full space-y-6 p-4 ">
+        {filteredCompanies.map((job, index) => (
+            <JobCard
+            key={index}
+            {...job}
+            />
+        ))}
+        </div>
     </div>
-    <div className="space-y-6">
-      {filteredCompanies.map((job, index) => (
-        <JobCard
-          key={index}
-          {...job}
-        />
-      ))}
-    </div>
-    <div className="p-6">
+    <div className="p-6 w-1/3 flex-grow">
       <FilterCompanies onFilter={handleFilter} />
-      <div className="mt-6">
-        <h2 className="text-2xl font-bold mb-4">Filtered Results</h2>
-        <p>Location: {location}</p>
-        <p>Industry: {industry}</p>
-        {/* Render filtered results here based on location and industry */}
-      </div>
+      
     </div>
 
-
+    </div>
     </div>
   )
 }

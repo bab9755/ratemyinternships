@@ -1,7 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 
-const isProtectedRoute = createRouteMatcher(['/feed(.*)', '/chat(.*)']) //protect different routes
+const isProtectedRoute = createRouteMatcher(['/companies(.*)', '/chat(.*)']) //protect different routes
 
 export default clerkMiddleware((auth, req) => {
     if (isProtectedRoute(req)) auth().protect()
