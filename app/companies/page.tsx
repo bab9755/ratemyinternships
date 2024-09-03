@@ -5,18 +5,7 @@ import JobCard from '../components/JobCard'
 import FilterCompanies from '../components/CompanyFilter'
 const Page = () => {
 
-    const [location, setLocation] = useState<string>('');
-    const [industry, setIndustry] = useState<string>('');
-    const [company, setCompany] = useState<string>('');
-    const handleFilter = (newLocation: string, newIndustry: string) => {
-      setLocation(newLocation);
-        setIndustry(newIndustry);
-    // Implement filtering logic here, e.g., fetch filtered data from an API
-    console.log('Filtered by:', { location: newLocation, industry: newIndustry });
-  };
-    const handleSearch = (searchTerm: string) => {
-        setCompany(searchTerm);
-      };
+    
     // This is just dummy data
     const jobCards = [
         {
@@ -56,9 +45,23 @@ const Page = () => {
           stars: 3,
         },
       ];
-      const filteredCompanies = jobCards.filter((job) => job.name !== '' && job.industry !== '' && job.location !== '');
+    
     //   && job.name===company && job.industry===industry && job.location===location
-      
+    const [location, setLocation] = useState<string>('');
+    const [industry, setIndustry] = useState<string>('');
+    const [company, setCompany] = useState<string>('');
+    const [filteredCompanies, setFilteredCompanies] = useState(jobCards);
+    const handleFilter = (newLocation: string, newIndustry: string) => {
+      setLocation(newLocation);
+    setIndustry(newIndustry);
+    // Implement filtering logic here, e.g., fetch filtered data from an API
+    console.log('Filtered by:', { location: newLocation, industry: newIndustry });
+    setFilteredCompanies(jobCards.filter((job) => job.location===location  && job.industry ===industry));
+  };
+    const handleSearch = (searchTerm: string) => {
+        setCompany(searchTerm);
+        setFilteredCompanies(jobCards.filter((job) => job.name.toLowerCase()===company.toLowerCase() || job.industry.toLowerCase().includes(company.toLowerCase())));
+      };
 
   return (
     <div>
