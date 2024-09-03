@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-
+import Navbar from './components/Bar';
 import { SITE } from '~/config.js';
 // import SignUp from './components/SignUp';
 import Hero from '~/components/widgets/Hero';
@@ -35,7 +35,9 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <>
+    <Navbar />
       <h1>hello world</h1>
+      
       {/* <Hero {...heroHome} />
       <SocialProof {...socialProofHome} />
       <Features {...featuresHome} />
