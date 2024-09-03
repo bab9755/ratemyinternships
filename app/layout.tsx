@@ -1,7 +1,14 @@
 import { Metadata } from 'next';
-
+import SessionWrapper from '../components/SessionWrapper';
 import { SITE } from '~/config.js';
-
+import { dark } from '@clerk/themes'
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton
+} from '@clerk/nextjs'
 import Providers from '~/components/atoms/Providers';
 import Header from '~/components/widgets/Header';
 import Announcement from '~/components/widgets/Announcement';
@@ -26,6 +33,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps) {
   return (
+      <ClerkProvider appearance={{
+        baseTheme: dark,
+      }}>
     <html lang="en" className={`motion-safe:scroll-smooth 2xl:text-[24px] ${customFont.variable} font-sans`}>
       <head>
         <meta charSet="utf-8" />
@@ -39,5 +49,6 @@ export default function RootLayout({ children }: LayoutProps) {
         </Providers>
       </body>
     </html>
+    </ClerkProvider>
   );
 }
